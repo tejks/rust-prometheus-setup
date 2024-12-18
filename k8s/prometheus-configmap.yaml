@@ -9,6 +9,6 @@ data:
       scrape_interval: 15s
 
     scrape_configs:
-      - job_name: "prometheus-app"
+      - job_name: 'pushgateway'
         static_configs:
-          - targets: ["prometheus-app:3000"]
+          - targets: ['prometheus-prometheus-pushgateway:9091']
