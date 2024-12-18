@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus-data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    environment:
+      - PROMETHEUS_URL=http://app:3000/metrics
+    labels:
+      - "prometheus.io/scrape: 'true'"
+      - "prometheus.io/port: '9090'"
+    networks:
+      - app-network
+
+  app:
+    image: prometest:latest
+    pull_policy: never
+    ports:
+      - "3001:3000" # Map internal port 9898 to localhost
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000" # Grafana HTTP port
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - "GF_SERVER_ROOT_URL=http://localhost:3000"
+      - "GF_PATHS_PROVISIONING=/etc/grafana/provisioning"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  prometheus-data:
+  grafana-data:

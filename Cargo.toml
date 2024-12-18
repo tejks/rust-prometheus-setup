@@ -1,0 +1,16 @@
+[package]
+name = "prome-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7.9"
+bytes = "1.9.0"
+http-body-util = "0.1.2"
+hyper = { version = "1.5.2", features = ["server", "http1"]}
+hyper-util = { version = "0.1", features = ["tokio"] }
+lazy_static = "1.5.0"
+prometheus = { version = "0.13.4", features = ["push"]}
+rand = "0.8.5"
+tokio = { version = "1.42.0", features = ["full"] }
+warp = "0.3.7"
