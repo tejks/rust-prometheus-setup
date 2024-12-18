@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-app
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-app
+  template:
+    metadata:
+      labels:
+        app: prometheus-app
+    spec:
+      containers:
+        - name: prometheus-app
+          image: tejksdev/prometest:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PROMETHEUS_URL
+              value: "http://prometheus-server.monitoring.svc.cluster.local:9090/metrics"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
