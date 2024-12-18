@@ -1,5 +1,4 @@
 use std::convert::Infallible;
-use std::net::SocketAddr;
 
 use http_body_util::Full;
 use hyper::body::Bytes;
@@ -7,7 +6,7 @@ use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::{Request, Response};
 use hyper_util::rt::TokioIo;
-use tokio::net::TcpListener;
+use rand::Rng;
 
 use lazy_static::lazy_static;
 use prometheus::{labels, opts, register_counter, register_gauge, register_histogram_vec};
@@ -17,19 +16,19 @@ use tokio::time::Duration;
 
 lazy_static! {
     static ref HTTP_COUNTER: Counter = register_counter!(opts!(
-        "example_http_requests_total",
+        "http_requests_total",
         "Number of HTTP requests made.",
         labels! {"handler" => "all",}
     ))
     .unwrap();
     static ref HTTP_BODY_GAUGE: Gauge = register_gauge!(opts!(
-        "example_http_response_size_bytes",
+        "http_response_size_bytes",
         "The HTTP response sizes in bytes.",
         labels! {"handler" => "all",}
     ))
     .unwrap();
     static ref HTTP_REQ_HISTOGRAM: HistogramVec = register_histogram_vec!(
-        "example_http_request_duration_seconds",
+        "http_request_duration_seconds",
         "The HTTP request latencies in seconds.",
         &["handler"]
     )
@@ -43,7 +42,15 @@ lazy_static! {
 
 async fn update_account_balance() {
     loop {
-        ACCOUNT_BALANCE.add(10.0);
+        let random_number = rand::thread_rng().gen_range(-50.0..100.0);
+
+        if (ACCOUNT_BALANCE.get() + random_number) < 0.0 {
+            print!("Account balance cannot be negative\n");
+            sleep(Duration::from_secs(1)).await;
+            continue;
+        }
+
+        ACCOUNT_BALANCE.add(random_number);
         print!("Updated account balance\n");
         sleep(Duration::from_secs(1)).await;
     }
@@ -52,26 +59,21 @@ async fn update_account_balance() {
 async fn handle_request(
     _req: Request<hyper::body::Incoming>,
 ) -> Result<Response<Full<Bytes>>, Infallible> {
-    print!("Received request\n");
-    // Increment Prometheus metrics
     HTTP_COUNTER.inc();
     let timer = HTTP_REQ_HISTOGRAM.with_label_values(&["all"]).start_timer();
 
-    // Gather and encode metrics
     let encoder = TextEncoder::new();
     let metric_families = prometheus::gather();
     let mut buffer = Vec::new();
     encoder.encode(&metric_families, &mut buffer).unwrap();
     HTTP_BODY_GAUGE.set(buffer.len() as f64);
 
-    // Create a response
     let response = Response::builder()
         .status(200)
         .header("Content-Type", encoder.format_type())
         .body(Full::from(Bytes::from(buffer)))
         .unwrap();
 
-    // Observe the request duration
     timer.observe_duration();
 
     Ok(response)
@@ -79,14 +81,9 @@ async fn handle_request(
 
 #[tokio::main]
 async fn main() {
-    // Define the server address
-    let addr = SocketAddr::from(([127, 0, 0, 1], 9899));
-    println!("Listening on http://{}", addr);
-
     tokio::task::spawn(update_account_balance());
 
-    // Create a TCP listener
-    let listener = TcpListener::bind(addr).await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
     loop {
         let (stream, _) = listener.accept().await.unwrap();
