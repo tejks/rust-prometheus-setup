@@ -24,7 +24,7 @@ async fn push_metrics_to_gateway(pushgateway_url: &str, job_name: &str) {
             println!("Metrics pushed successfully.");
         }
 
-        sleep(Duration::from_secs(10)).await; // Push co 10 sekund
+        sleep(Duration::from_secs(10)).await;
     }
 }
 
