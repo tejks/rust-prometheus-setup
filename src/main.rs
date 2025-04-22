@@ -11,7 +11,7 @@ lazy_static::lazy_static! {
 
 async fn push_metrics_to_gateway(pushgateway_url: &str, job_name: &str) {
     loop {
-        ACCOUNT_BALANCE.set(ACCOUNT_BALANCE.get() + 10.0); // Przykład zmiany metryki
+        ACCOUNT_BALANCE.set(ACCOUNT_BALANCE.get() + 10.0);
         if let Err(e) = push_metrics(
             job_name,
             labels! {"handler".to_owned() => "all".to_owned(),},
@@ -31,12 +31,12 @@ async fn push_metrics_to_gateway(pushgateway_url: &str, job_name: &str) {
 #[tokio::main]
 async fn main() {
     let pushgateway_url =
-        "http://prometheus-prometheus-pushgateway.monitoring.svc.cluster.local:9091"; // Pushgateway adres
-    let job_name = "pushgateway"; // Nazwa pracy
+        "http://prometheus-prometheus-pushgateway.monitoring.svc.cluster.local:9091";
+    let job_name = "pushgateway";
 
     tokio::task::spawn(push_metrics_to_gateway(pushgateway_url, job_name));
 
     loop {
-        sleep(Duration::from_secs(60)).await; // Główna pętla aplikacji
+        sleep(Duration::from_secs(60)).await;
     }
 }
