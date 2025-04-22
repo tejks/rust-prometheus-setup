@@ -11,8 +11,8 @@ It supports both **pull-based metrics exposition** and **push-based metrics via 
 
 | Branch            | Description                                     | Link                                           |
 |-------------------|-------------------------------------------------|------------------------------------------------|
-| `main`            | Pull-based Prometheus metrics exposition        | 👉 [View `main` branch](https://github.com/your-username/your-repo/tree/main) |
-| `push-gateway`    | Push metrics to Prometheus PushGateway          | 👉 [View `push-gateway` branch](https://github.com/your-username/your-repo/tree/push-gateway) |
+| `main`            | Pull-based Prometheus metrics exposition        | [View `main` branch](https://github.com/tejks/rust-prometheus-setup/tree/main) |
+| `push-gateway`    | Push metrics to Prometheus PushGateway          | [View `push-gateway` branch](https://github.com/tejks/rust-prometheus-setup/tree/push-gateway) |
 
 &nbsp;
 &nbsp;
